@@ -72,37 +72,39 @@ function CreateTransaction() {
 
     return (
         <div className="container">
-            <div className="row justify-content-center mt-4 my-4">
-                <div className="col-lg-6 border">
-                    <div className='mb-2 my-2 py-2'>
-                        <h2>Enter Transaction</h2>
+        <div className="row justify-content-center mt-4 my-4">
+            <div className="col-lg-10 mb-3">
+                <div className="card shadow-lg">
+                    <div className="card-body">
+                        <h2 className="card-title mb-4">Enter Transaction</h2>
+                        <form onSubmit={handleFormSubmit}>
+                            <div className="mb-3">
+                                <label htmlFor="amount" className="form-label">Amount</label>
+                                <input type="text" className="form-control" id="amount" name="amount" onChange={handleInputChange} value={formData.amount} required />
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="category" className="form-label">Category</label>
+                                <input type="text" className="form-control" id="category" name="category" onChange={handleInputChange} value={formData.category} required />
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="description" className="form-label">Description</label>
+                                <input type="text" className="form-control" id="description" name="description" onChange={handleInputChange} value={formData.description} required />
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="is_income" className="form-label">Income</label><br />
+                                <input type="checkbox" id="is_income" name="is_income" onChange={handleInputChange} checked={formData.is_income} />
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="date" className="form-label">Date</label>
+                                <input type="text" className="form-control" id="date" name="date" onChange={handleInputChange} value={formData.date} required />
+                            </div>
+                            <button type="submit" className="btn btn-primary">Submit</button>
+                        </form>
                     </div>
-                    <form onSubmit={handleFormSubmit}>
-                        <div className="mb-3">
-                            <label htmlFor="amount" className="form-label">Amount</label>
-                            <input type="text" className="form-control" id="amount" name="amount" onChange={handleInputChange} value={formData.amount} required />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="category" className="form-label">Category</label>
-                            <input type="text" className="form-control" id="category" name="category" onChange={handleInputChange} value={formData.category} required />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="description" className="form-label">Description</label>
-                            <input type="text" className="form-control" id="description" name="description" onChange={handleInputChange} value={formData.description} required />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="is_income" className="form-label">Income</label><br />
-                            <input type="checkbox" id="is_income" name="is_income" onChange={handleInputChange} checked={formData.is_income} />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="date" className="form-label">Date</label>
-                            <input type="text" className="form-control" id="date" name="date" onChange={handleInputChange} value={formData.date} required />
-                        </div>
-                        <button type="submit" className="btn btn-primary">Submit</button>
-                    </form>
                 </div>
             </div>
         </div>
+    </div>
     );
 }
 
