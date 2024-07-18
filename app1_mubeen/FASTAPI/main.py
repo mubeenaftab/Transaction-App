@@ -54,3 +54,5 @@ async def shutdown_event():
     function for application shutdown log
     """
     logger.info("Application shutdown")
+
+## ckjbifcban
