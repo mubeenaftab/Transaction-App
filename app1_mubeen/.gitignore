@@ -1,0 +1,7 @@
+__pycache__
+*.mypy_cache
+my_env
+*.env
+*__init__.py
+*app.log
+*.log
