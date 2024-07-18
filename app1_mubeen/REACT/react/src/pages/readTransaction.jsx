@@ -72,9 +72,9 @@ function ReadTransaction() {
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container">
             <div className="row justify-content-center ">
-                <div className="col-lg-10">
+                <div className="col-lg-10 mb-3">
                     <div className="card shadow-lg">
                         <div className="card-body">
                             <h2 className="card-title mb-4">Transactions List</h2>
@@ -107,7 +107,7 @@ function ReadTransaction() {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="d-flex justify-content-center mt-3">
+                            <div className="d-flex justify-content-center mt-1">
                                 <nav aria-label="Page navigation">
                                     <ul className="pagination">
                                         <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -124,9 +124,7 @@ function ReadTransaction() {
                                     </ul>
                                 </nav>
                             </div>
-                            <div className="text-center mt-3">
-                                <Link to="/" className="btn btn-secondary">Back to Home</Link>
-                            </div>
+                           
                         </div>
                     </div>
                 </div>
