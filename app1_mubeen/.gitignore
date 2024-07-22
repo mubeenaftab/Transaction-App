@@ -1,6 +1,6 @@
 __pycache__
 *.mypy_cache
-my_env
+myenv
 *.env
 *__init__.py
 *app.log
