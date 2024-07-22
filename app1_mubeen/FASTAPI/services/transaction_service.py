@@ -16,11 +16,13 @@ Usage:
     FastAPI exceptions for error handling, transaction schemas for data validation,
     SQLAlchemy models for database interaction, and constants for error messages.
 """
+from typing import Optional
 import schemas.transaction_schema as schemas
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from pydantic import UUID4
-from fastapi_pagination import Page
+from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
 from models import transaction_model
 from utils.constants import ErrorMessages
@@ -28,23 +30,49 @@ from utils.config import get_logger
 
 logger = get_logger()
 
-def get_all_transactions(db: Session) -> Page[transaction_model.Transaction]:
+def get_filtered_transactions_with_sum(db: Session, search: Optional[str] = None, page: int = 1, size: int = 9) -> dict:
     """
-    Retrieve all transactions from the database.
+    Retrieve transactions from the database based on filtering criteria and their total sum.
 
     Args:
         db (Session): The database session.
+        search (Optional[str]): The search term to filter transactions by category.
+        page (int): The current page number.
+        size (int): The number of items per page.
 
     Returns:
-        Page[transaction_model.Transaction]: Paginated list of transactions.
+        dict: A dictionary with a list of transactions and their total sum.
     """
     try:
-        transactions_query = db.query(transaction_model.Transaction)
-        logger.info(f"Retrieved transactions query: {transactions_query}")
-        return paginate(transactions_query)
+        query = db.query(transaction_model.Transaction)
+        
+        if search:
+            search = search.lower()
+            query = query.filter(
+                transaction_model.Transaction.category.ilike(f"%{search}%")|
+                transaction_model.Transaction.description.ilike(f"%{search}%")|
+                transaction_model.Transaction.date.ilike(f"%{search}%")
+            )
+        
+        total_amount = db.query(func.sum(transaction_model.Transaction.amount)).filter(
+            transaction_model.Transaction.category.ilike(f"%{search}%")|
+            transaction_model.Transaction.description.ilike(f"%{search}%")|
+            transaction_model.Transaction.date.ilike(f"%{search}%")
+        ).scalar() or 0
+        
+        transactions_page = paginate(query, Params(page=page, size=size))
+        
+        return {
+            "transactions": transactions_page.items,
+            "total_amount": total_amount, #total number of filtered transactions
+            "total": transactions_page.total, #Total number of transactions found.
+            "page": transactions_page.page, # current page number
+            "size": transactions_page.size,# number of items per page
+            "pages": transactions_page.pages,# total pages 
+        }
     except Exception as e:
-        logger.error(f"Error retrieving transactions: {e}")
-        raise HTTPException(status_code=500, detail= ErrorMessages.ERROR_RETRIEVING_TRANSACTION) from e
+        logger.error(f"Error retrieving filtered transactions with sum: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving transactions with sum") from e
     #raises the caught exception e after logging the error message. 
     #It connects the original exception (e) with the new HTTPException, ensuring that the full traceback is preserved, aiding in debugging.
 

@@ -5,32 +5,38 @@ import Swal from 'sweetalert2';
 
 function ReadTransaction() {
     const [transactions, setTransactions] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // Function to fetch transactions based on page number
-        const fetchTransactions = async (page = 1, size = 10) => {
-            try {
-                const response = await api.get(`/transactions`, { params: { page, size } });
-                setTransactions(response.data.items); // Assuming your API response has an 'items' field for transactions
-                setTotalPages(Math.ceil(response.data.total / size)); // Adjust according to your API response structure
-            } catch (error) {
-                console.error('Error fetching transactions:', error);
-                // Handle error state if needed
-            }
-        };
+    const fetchTransactions = async (page = 1, size = 9, search) => {
+        try {
+            const response = await api.get(`/transactions`, {
+                params: {
+                    page,
+                    size,
+                    search
+                }
+            });
+            setTransactions(response.data.transactions);
+            setTotalAmount(response.data.total_amount); //total amount of filtered transactions
+            setTotalPages(response.data.pages);
+            setCurrentPage(response.data.page);
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+        }
+    };
 
-    // Fetch transactions on component mount or when currentPage changes
     useEffect(() => {
-        fetchTransactions(currentPage);
-    }, [currentPage]);
+        fetchTransactions(currentPage, 9, searchTerm);
+    }, [currentPage, searchTerm]);
 
-    // Handle deletion of a transaction
     const handleDelete = async (transactionId) => {
         try {
             const result = await Swal.fire({
                 title: 'Are you sure?',
-                text: `Do you want to delete transaction ?`,
+                text: `Do you want to delete this transaction?`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
@@ -63,23 +69,31 @@ function ReadTransaction() {
                 toast: true,
                 showConfirmButton: false
             });
-        }``
+        }
     };
 
-    // Function to handle page change
-    const handlePageChange = (newPage) => {
-        setCurrentPage(newPage);
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
     };
 
     return (
-        <div className="container mt-4">
-            <div className="row justify-content-center ">
-                <div className="col-lg-10">
+        <div className="container">
+            <div className="row justify-content-center">
+                <div className="col-lg-10 mb-3">
                     <div className="card shadow-lg">
                         <div className="card-body">
                             <h2 className="card-title mb-4">Transactions List</h2>
+                            <div className="mb-3">
+                                <input
+                                    type="text"
+                                    placeholder="Search by category, description, date"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                    className="form-control mb-2"
+                                />
+                            </div>
                             <div className="table-responsive">
-                                <table className="table table-hover ">
+                                <table className="table table-hover">
                                     <thead className="table-light">
                                         <tr>
                                             <th scope="col">Amount</th>
@@ -88,6 +102,7 @@ function ReadTransaction() {
                                             <th scope="col">Income</th>
                                             <th scope="col">Date</th>
                                             <th scope="col">Actions</th>
+                                         
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -107,25 +122,28 @@ function ReadTransaction() {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="d-flex justify-content-center mt-3">
+                   
+                                <div className="alert alert-primary pb-0" role="alert">
+                                    <h5 className="alert-heading">Total Amount</h5>
+                                    <p className="fs-5 pb-0">${totalAmount}</p>
+                                </div>
+                        
+                            <div className="d-flex justify-content-center mt-1">
                                 <nav aria-label="Page navigation">
                                     <ul className="pagination">
                                         <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                            <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>Previous</button>
+                                            <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>Previous</button>
                                         </li>
-                                        {[...Array(totalPages).keys()].map(page => (
-                                            <li key={page + 1} className={`page-item ${currentPage === page + 1 ? 'active' : ''}`}>
-                                                <button className="page-link" onClick={() => handlePageChange(page + 1)}>{page + 1}</button>
+                                        {Array.from({ length: totalPages }, (_, index) => (
+                                            <li key={index + 1} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                                <button className="page-link" onClick={() => setCurrentPage(index + 1)}>{index + 1}</button>
                                             </li>
                                         ))}
                                         <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                            <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Next</button>
+                                            <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
                                         </li>
                                     </ul>
                                 </nav>
-                            </div>
-                            <div className="text-center mt-3">
-                                <Link to="/" className="btn btn-secondary">Back to Home</Link>
                             </div>
                         </div>
                     </div>
@@ -136,7 +154,3 @@ function ReadTransaction() {
 }
 
 export default ReadTransaction;
-
-
-
-

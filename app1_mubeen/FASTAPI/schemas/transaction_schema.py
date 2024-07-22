@@ -85,3 +85,14 @@ class Transaction(TransactionBase):
         orm_mode (bool): SQLAlchemy mode for data interaction.
         """
         orm_mode = True
+
+class TransactionsResponse(BaseModel):
+    """
+    for total amount
+    """
+    transactions: list[Transaction]
+    total_amount: float
+    total: int #total no of pages
+    page: int  #current page of table
+    size: int
+    pages: int

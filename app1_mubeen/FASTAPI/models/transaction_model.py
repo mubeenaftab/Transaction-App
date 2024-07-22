@@ -13,7 +13,7 @@ Usage:
 import uuid
 from sqlalchemy import String, Column, Boolean, Float
 from sqlalchemy.dialects.postgresql import UUID
-from models.database import Base
+from .database import Base
 
 #base an instance of sql alchemy thats how it knows this is class for creating table
 class Transaction(Base):

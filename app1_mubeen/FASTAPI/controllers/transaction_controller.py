@@ -3,7 +3,7 @@ Module defining FastAPI router setup and dependencies.
 Importing APIRouter and Depends from FastAPI for defining routes and managing dependencies.
 importing sql alchemy for database
 """
-
+from typing import Optional
 import schemas.transaction_schema as schemas
 import services.transaction_service as transaction_service
 from fastapi import APIRouter, Depends
@@ -36,21 +36,29 @@ async def create_transaction(transaction: schemas.TransactionCreate,
     logger.info(f"Transaction created successfully with ID: {created_transaction.table_name_id}")
     return created_transaction
 
-@router.get("/transactions", response_model=Page[schemas.Transaction])
-async def read_transactions(db: Session = Depends(get_db)) -> Page[schemas.Transaction]:
+@router.get("/transactions", response_model=schemas.TransactionsResponse)
+async def read_transactions(
+    db: Session = Depends(get_db),
+    search: Optional[str] = None,
+    page: int = 1,
+    size: int = 9
+) -> schemas.TransactionsResponse:
     """
-    Retrieve all transactions from the database.
+    Retrieve filtered transactions and their total amount from the database.
 
     Args:
+        search (Optional[str]): The search term to filter transactions by category.
         db (Session): The database session.
+        page (int): The current page number.
+        size (int): The number of items per page.
 
     Returns:
-        list[schemas.Transaction]: A list of all transactions.
+        dict: A dictionary with a list of filtered transactions and their total sum.
     """
-    logger.info("Fetching all transactions from the database")
-    transactions = transaction_service.get_all_transactions(db)
-    logger.info("Retrieved transactions from the database")
-    return transactions
+    logger.info("Fetching filtered transactions and their total amount from the database")
+    result = transaction_service.get_filtered_transactions_with_sum(db, search, page, size)
+    logger.info("Retrieved filtered transactions and their total amount from the database")
+    return result
 
 @router.get("/transactions/{transaction_id}", response_model=schemas.Transaction)
 def read_transaction(transaction_id: UUID4, db: Session = Depends(get_db))-> schemas.Transaction:

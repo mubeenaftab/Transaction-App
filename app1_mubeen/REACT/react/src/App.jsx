@@ -8,18 +8,24 @@ import api from './api';
 const App = () => {
   return (
     <Router>
-      <div className="container m-5">
-        <div className='text-sm-center mx-auto p-2'>
-          <h2>Transaction Management</h2>
-        </div>
-        <div className='text-sm-center mx-auto p-2' >
-          <ul className="list-unstyled">
-            <li className='mb-2' ><Link className='btn btn-primary text-white' to="/create-transaction">Create Transaction</Link></li>
-            <li > <Link className='btn btn-danger text-white' to="/read-transaction">Read Transaction</Link></li>
-          </ul>
-        </div>
+<div className="container-fluid d-flex justify-content-center align-items-center vh-10 ">
+  <div className="container p-5 rounded">
+    <div className="text-center">
+      <h2>Transaction Management</h2>
+    </div>
+    <div className="text-center p-2">
+      <ul className="list-unstyled">
+        <li className="mb-2">
+          <Link className="btn btn-primary" to="/create-transaction">Create Transaction</Link>
+        </li>
+        <li>
+          <Link className="btn btn-danger" to="/read-transaction">Read Transaction</Link>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
 
-      </div>
       <Routes>
         <Route path="/create-transaction" element={<CreateTransaction />} />
         <Route path="/read-transaction" element={<ReadTransaction />} />
