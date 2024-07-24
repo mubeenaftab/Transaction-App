@@ -82,9 +82,14 @@ class Transaction(TransactionBase):
     class Config:
         """
         Config:
-        orm_mode (bool): SQLAlchemy mode for data interaction.
+          from_attributes (bool): 
+            When set to True, Pydantic will initialize the model using 
+            attributes from an existing object rather than requiring 
+            field names to match exactly. This is useful for working with 
+            custom classes or data structures that do not conform to ORM 
+            models. 
         """
-        orm_mode = True
+        from_attributes = True
 
 class TransactionsResponse(BaseModel):
     """
