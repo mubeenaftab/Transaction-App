@@ -9,6 +9,7 @@ Imports:
     load_dotenv: A function from python-dotenv used to load environment variables from a .env file.
 """
 import os
+import sys
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 from loguru import logger
@@ -17,7 +18,7 @@ from loguru import logger
 # Remove default logger to prevent duplicate logs
 logger.remove()
 # Add a logger with your desired settings
-logger.add("app.log", rotation="500 MB", level="DEBUG", format="{time} {level} {message}")
+logger.add(sys.stdout, level="DEBUG", format="{time} {level} {message}")
 # Function to get the logger
 def get_logger():
     """
