@@ -6,7 +6,7 @@ import UpdateTransaction from './pages/updateTransaction'
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/login';
 import Register from './pages/register';
-import NavBar from './components/navbar ';
+import NavBar from './components/navbar';
 
 const PrivateRoute = ({ element: Component, ...rest }) => {
   const { user, loading } = useAuth();

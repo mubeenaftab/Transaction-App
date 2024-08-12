@@ -80,13 +80,13 @@ function ReadTransaction() {
         <div className="container">
             <div className="container-fluid d-flex justify-content-center align-items-center vh-10 ">
                 <div className="container p-5 rounded">
-                    <div className="text-center">
-                        <h2>Transaction Management</h2>
-                    </div>
                     <div className="text-center p-2">
                         <ul className="list-unstyled">
                             <li className="mb-2">
                                 <Link className="btn btn-primary" to="/create-transaction">Create Transaction</Link>
+                            </li>
+                            <li className="mb-2">
+                                <Link className="btn btn-danger" to="/read-transaction">Read Transaction</Link>
                             </li>
                         </ul>
                     </div>
