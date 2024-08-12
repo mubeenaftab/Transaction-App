@@ -30,7 +30,13 @@ from utils.config import get_logger
 
 logger = get_logger()
 
-def get_filtered_transactions_with_sum(db: Session, search: Optional[str] = None, page: int = 1, size: int = 9) -> dict:
+def get_filtered_transactions_with_sum(
+    db: Session, 
+    search: Optional[str] = None, 
+    page: int = 1, 
+    size: int = 9,
+    user_id: Optional[UUID4] = None  # Add this line to accept user_id
+) -> dict:
     """
     Retrieve transactions from the database based on filtering criteria and their total sum.
 
@@ -39,12 +45,16 @@ def get_filtered_transactions_with_sum(db: Session, search: Optional[str] = None
         search (Optional[str]): The search term to filter transactions by category.
         page (int): The current page number.
         size (int): The number of items per page.
+        user_id (Optional[UUID4]): The user ID to filter transactions by user.
 
     Returns:
         dict: A dictionary with a list of transactions and their total sum.
     """
     try:
         query = db.query(transaction_model.Transaction)
+        
+        if user_id:
+            query = query.filter(transaction_model.Transaction.owner_id == user_id)
         
         if search:
             search = search.lower()
@@ -55,26 +65,51 @@ def get_filtered_transactions_with_sum(db: Session, search: Optional[str] = None
             )
         
         total_amount = db.query(func.sum(transaction_model.Transaction.amount)).filter(
-            transaction_model.Transaction.category.ilike(f"%{search}%")|
+            (transaction_model.Transaction.owner_id == user_id) &
+            (transaction_model.Transaction.category.ilike(f"%{search}%")|
             transaction_model.Transaction.description.ilike(f"%{search}%")|
-            transaction_model.Transaction.date.ilike(f"%{search}%")
+            transaction_model.Transaction.date.ilike(f"%{search}%"))
         ).scalar() or 0
         
         transactions_page = paginate(query, Params(page=page, size=size))
         
         return {
             "transactions": transactions_page.items,
-            "total_amount": total_amount, #total number of filtered transactions
-            "total": transactions_page.total, #Total number of transactions found.
-            "page": transactions_page.page, # current page number
-            "size": transactions_page.size,# number of items per page
-            "pages": transactions_page.pages,# total pages 
+            "total_amount": total_amount,
+            "total": transactions_page.total,
+            "page": transactions_page.page,
+            "size": transactions_page.size,
+            "pages": transactions_page.pages,
         }
     except Exception as e:
         logger.error(f"Error retrieving filtered transactions with sum: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving transactions with sum") from e
-    #raises the caught exception e after logging the error message. 
-    #It connects the original exception (e) with the new HTTPException, ensuring that the full traceback is preserved, aiding in debugging.
+
+
+#keeping code clean by using DRY principle 
+def fetch_transaction_id(transaction_id: UUID4, db: Session) -> transaction_model.Transaction:
+    """
+    Fetch a transaction from the database by its ID.
+
+    Args:
+        transaction_id (UUID4): The UUID4 ID of the transaction to fetch.
+        db (Session): The database session.
+
+    Returns:
+        models.Transaction: The transaction object corresponding to the given ID.
+
+    Raises:
+        HTTPException: Raised with status code 404 if the 
+        transaction with the specified ID is not found.
+    """
+    db_transaction = db.query(transaction_model.Transaction).filter(
+        transaction_model.Transaction.table_name_id == transaction_id).first()
+    if not db_transaction:
+        logger.error(f"Transaction with ID: {transaction_id} not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                            detail=ErrorMessages.TRANSACTION_NOT_FOUND)
+    return db_transaction
+
 
 def get_transaction_by_id(transaction_id: UUID4, db: Session) -> transaction_model.Transaction:
     """
@@ -92,8 +127,7 @@ def get_transaction_by_id(transaction_id: UUID4, db: Session) -> transaction_mod
         transaction with the specified ID is not found.
     """
     try:
-        db_transaction = db.query(transaction_model.Transaction).filter(
-            transaction_model.Transaction.table_name_id == transaction_id).first()
+        db_transaction = fetch_transaction_id(transaction_id, db)
         if not db_transaction:
             logger.error(f"Transaction with ID: {transaction_id} not found")
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
@@ -103,33 +137,7 @@ def get_transaction_by_id(transaction_id: UUID4, db: Session) -> transaction_mod
     except Exception as e:
         logger.error(f"Error retrieving transaction: {e}")
         raise HTTPException(status_code=500, detail=ErrorMessages.ERROR_RETRIEVING_TRANSACTION)from e
-
-def create_transaction(transaction: schemas.TransactionBase,
-                        db: Session) -> transaction_model.Transaction:
-    """
-    Create a new transaction in the database.
-
-    Args:
-        transaction (schemas.TransactionBase): The transaction data to create.
-        db (Session): The database session.
-
-    Returns:
-        models.Transaction: The created transaction object.
-
-    Raises:
-        HTTPException: Raised if there is an error during transaction creation.
-    """
-    try:
-        db_transaction = transaction_model.Transaction(**transaction.dict())
-        db.add(db_transaction)
-        db.commit()
-        db.refresh(db_transaction)
-        logger.info(f"Transaction created successfully with ID: {db_transaction.table_name_id}")
-        return db_transaction
-    except Exception as e:
-        logger.error(f"Error creating transaction: {e}")
-        raise HTTPException(status_code=500, detail=ErrorMessages.ERROR_CREATING_TRANSACTION)from e
-
+    
 def update_transaction(transaction_id: UUID4, 
             transaction: schemas.TransactionBase, db: Session) -> transaction_model.Transaction:
     """
@@ -147,8 +155,7 @@ def update_transaction(transaction_id: UUID4,
         HTTPException: Raised if the transaction with the given ID is not found.
     """
     try:
-        db_transaction = db.query(transaction_model.Transaction).filter(
-            transaction_model.Transaction.table_name_id == transaction_id).first()
+        db_transaction = fetch_transaction_id(transaction_id, db)
         if not db_transaction:
             logger.error(f"Transaction with ID: {transaction_id} not found")
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -162,6 +169,26 @@ def update_transaction(transaction_id: UUID4,
     except Exception as e:
         logger.error(f"Error updating transaction: {e}")
         raise HTTPException(status_code=500, detail=ErrorMessages.ERROR_UPDATING_TRANSACTION)from e
+
+
+def create_transaction(transaction: schemas.TransactionCreate, owner_id: UUID4, db: Session) -> transaction_model.Transaction:
+    """
+    Create a new transaction in the database.
+    """
+    try:
+        transaction_data = transaction.dict()
+        transaction_data['owner_id'] = owner_id
+        db_transaction = transaction_model.Transaction(**transaction_data)
+        db.add(db_transaction)
+        db.commit()
+        db.refresh(db_transaction)
+        logger.info(f"Transaction created successfully with ID: {db_transaction.table_name_id}")
+        return db_transaction
+    except Exception as e:
+        logger.error(f"Error creating transaction: {e}")
+        raise HTTPException(status_code=500, detail=ErrorMessages.ERROR_CREATING_TRANSACTION) from e
+
+
 
 def delete_transaction(transaction_id: UUID4, db: Session) -> None:
     """

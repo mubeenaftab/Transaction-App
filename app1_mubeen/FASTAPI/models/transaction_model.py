@@ -14,6 +14,8 @@ import uuid
 from sqlalchemy import String, Column, Boolean, Float
 from sqlalchemy.dialects.postgresql import UUID
 from .database import Base
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy.orm import relationship
 
 #base an instance of sql alchemy thats how it knows this is class for creating table
 class Transaction(Base):
@@ -21,9 +23,11 @@ class Transaction(Base):
     SQLAlchemy model for transactions.
     """
     __tablename__ = "transactionsGIT"
-    table_name_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    table_name_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     amount = Column(Float, nullable=False)
     category = Column(String)
     description = Column(String)
     is_income = Column(Boolean)
     date = Column(String)
+    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    owner = relationship("User", back_populates="transactions")

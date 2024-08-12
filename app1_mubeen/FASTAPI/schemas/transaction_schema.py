@@ -14,47 +14,15 @@ Example:
 from pydantic import BaseModel, UUID4
 
 class TransactionBase(BaseModel):
-    """
-    Base Pydantic model for defining transaction data.
-
-    Attributes:
-        amount (float): The amount of the transaction.
-        category (str): The category of the transaction.
-        description (str): The description of the transaction.
-        is_income (bool): Indicates if the transaction is income (`True`) or expense (`False`).
-        date (str): The date of the transaction.
-
-    Usage:
-        This model is used for validating and serializing transaction data in FastAPI endpoints.
-        It inherits from Pydantic's BaseModel for data validation and schema definition.
-
-    Example:
-        transaction_data = TransactionBase(amount=100.0, category="Groceries", 
-                         description="Grocery shopping", is_income=False, date="2024-07-15")
-
-    """
     amount: float
     category: str
     description: str
     is_income: bool
     date: str
 
+
 class TransactionCreate(TransactionBase):
-    """
-    Pydantic model for creating a new transaction based on TransactionBase.
-
-    Inherits:
-        TransactionBase: Base Pydantic model for defining transaction data.
-
-    Usage:
-        This model is used to create new transaction records in the database. It inherits all
-        attributes from TransactionBase and does not add any new attributes.
-
-    Example:
-        create_data = TransactionCreate(amount=150.0, category="Shopping", 
-                             description="Online shopping", is_income=False, date="2024-07-15")
-
-    """
+    pass
 
 class Transaction(TransactionBase):
     """
@@ -78,7 +46,7 @@ class Transaction(TransactionBase):
 
     """
     table_name_id: UUID4
-
+    owner_id: UUID4
     class Config:
         """
         Config:

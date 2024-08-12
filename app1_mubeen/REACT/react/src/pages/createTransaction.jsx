@@ -62,6 +62,7 @@ function CreateTransaction() {
 
     return (
         <div className="container">
+            
             <div className="row justify-content-center mt-4 my-4">
                 <div className="col-lg-10 mb-3">
                     <div className="card shadow-lg">

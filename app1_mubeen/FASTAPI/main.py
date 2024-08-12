@@ -15,7 +15,7 @@ Usage:
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controllers import transaction_controller
+from controllers import transaction_controller, user_controller
 from utils.config import get_logger
 from models.database import engine, Base
 from mangum import Mangum
@@ -23,10 +23,11 @@ app = FastAPI()
 # Initialize logger
 logger = get_logger()
 
+
 #allowing application on this port to interact with fastapi
 origins = [
     'http://localhost:5173',
-    'https://transactionmanagement.netlify.app/'
+    # 'https://transactionmanagement.netlify.app/'
 ]
 
 app.add_middleware(
@@ -37,10 +38,11 @@ app.add_middleware(
     allow_headers=['*']
 )
 
-
+app.include_router(user_controller.router)
 app.include_router(transaction_controller.router)
 #for deploying fastapi on serverless architecture like vercel
 handler = Mangum(app)
+# Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 @app.on_event("startup")
@@ -58,4 +60,3 @@ async def shutdown_event():
     """
     logger.info("Application shutdown")
 
-## ckjbifcban
