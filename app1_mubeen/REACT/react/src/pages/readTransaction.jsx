@@ -79,22 +79,19 @@ function ReadTransaction() {
     return (
         <div className="container">
             <div className="container-fluid d-flex justify-content-center align-items-center vh-10 ">
-  <div className="container p-5 rounded">
-    <div className="text-center">
-      <h2>Transaction Management</h2>
-    </div>
-    <div className="text-center p-2">
-      <ul className="list-unstyled">
-        <li className="mb-2">
-          <Link className="btn btn-primary" to="/create-transaction">Create Transaction</Link>
-        </li>
-        <li>
-          <Link className="btn btn-danger" to="/read-transaction">Read Transaction</Link>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
+                <div className="container p-5 rounded">
+                    <div className="text-center">
+                        <h2>Transaction Management</h2>
+                    </div>
+                    <div className="text-center p-2">
+                        <ul className="list-unstyled">
+                            <li className="mb-2">
+                                <Link className="btn btn-primary" to="/create-transaction">Create Transaction</Link>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
             <div className="row justify-content-center">
                 <div className="col-lg-10 mb-3">
                     <div className="card shadow-lg">
@@ -119,7 +116,7 @@ function ReadTransaction() {
                                             <th scope="col">Income</th>
                                             <th scope="col">Date</th>
                                             <th scope="col">Actions</th>
-                                         
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -139,12 +136,12 @@ function ReadTransaction() {
                                     </tbody>
                                 </table>
                             </div>
-                   
-                                <div className="alert alert-primary pb-0" role="alert">
-                                    <h5 className="alert-heading">Total Amount</h5>
-                                    <p className="fs-5 pb-0">${totalAmount}</p>
-                                </div>
-                        
+
+                            <div className="alert alert-primary pb-0" role="alert">
+                                <h5 className="alert-heading">Total Amount</h5>
+                                <p className="fs-5 pb-0">${totalAmount}</p>
+                            </div>
+
                             <div className="d-flex justify-content-center mt-1">
                                 <nav aria-label="Page navigation">
                                     <ul className="pagination">

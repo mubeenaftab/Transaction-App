@@ -6,15 +6,21 @@ import UpdateTransaction from './pages/updateTransaction'
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/login';
 import Register from './pages/register';
+import NavBar from './components/navbar ';
 
 const PrivateRoute = ({ element: Component, ...rest }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div>Loading...</div>; // Or any loading component
+    return <div>Loading...</div>;
   }
   
-  return user ? <Component {...rest} /> : <Navigate to="/login" />;
+  return user ? (
+    <>
+      <NavBar />
+      <Component {...rest} />
+    </>
+  ) : <Navigate to="/login" />;
 };
 
 const App = () => {
